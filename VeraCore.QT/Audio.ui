@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AudioSettings</class>
+ <widget class="QWidget" name="AudioSettings">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>648</width>
+    <height>428</height>
+   </rect>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
+  <property name="windowTitle">
+   <string>AudioSettings</string>
+  </property>
+  <widget class="QGroupBox" name="backendGroup">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>621</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Audio Backend</string>
+   </property>
+   <widget class="QComboBox" name="deviceBackend">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>601</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>ASIO</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>MME</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="device">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>601</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="showASIODevice">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>80</y>
+      <width>111</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show ASIO panel</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="audioSettings">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>140</y>
+     <width>621</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Audio Settings</string>
+   </property>
+   <widget class="QComboBox" name="sampleRate">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>601</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>44100</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>48000</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>88200</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>96000</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>192000</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="sampleRateLabel">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Sample Rate (Hz):</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

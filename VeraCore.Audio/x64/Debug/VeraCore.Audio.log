@@ -1,0 +1,3 @@
+﻿  VeraCoreAudio.cpp
+C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\VeraCore.Audio\VeraCoreAudio.cpp(21,23): warning C4018: '<': signed/unsigned mismatch
+  VeraCore.Audio.vcxproj -> C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\x64\Debug\VeraCore.Audio.dll

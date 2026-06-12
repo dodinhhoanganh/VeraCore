@@ -1,0 +1,12 @@
+﻿  AudioGeneral.cpp
+  Preferences.cpp
+  VeraCoreQT.cpp
+  DarkStyle.cpp
+  main.cpp
+  qrc_VeraCoreQT.cpp
+  qrc_darkstyle.cpp
+  moc_VeraCoreQT.cpp
+  moc_DarkStyle.cpp
+  moc_Preferences.cpp
+  VeraCore.QT.vcxproj -> C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\x64\Debug\VeraCore.QT.exe
+          1 file(s) copied.

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{16D206F3-67DB-4042-8C6F-799334CA3F44}</ProjectGuid>
+    <Keyword>QtVS_v304</Keyword>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
+    <QtInstall>cai nit</QtInstall>
+    <QtModules>core;gui;widgets</QtModules>
+    <QtBuildConfig>debug</QtBuildConfig>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
+    <QtInstall>cai nit</QtInstall>
+    <QtModules>core;gui;widgets</QtModules>
+    <QtBuildConfig>release</QtBuildConfig>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <IncludePath>$(MSBuildProjectDirectory)\..\3rdparty\vst3sdk;$(MSBuildProjectDirectory)\..\3rdparty\vst2sdk\include;$(MSBuildProjectDirectory)\..\3rdparty\clap\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PostBuildEvent>
+      <Command>copy /Y "C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>"C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.lib";"C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\x64\Debug\VeraCore.Audio.lib";%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ClCompile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio;C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\VeraCore\3rdparty\portaudio\include;$(MSBuildProjectDirectory)\..\3rdparty\vst3sdk;$(MSBuildProjectDirectory)\..\3rdparty\vst2sdk\include;$(MSBuildProjectDirectory)\..\3rdparty\clap\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PostBuildEvent>
+      <Command>copy /Y "C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>"C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.lib";"C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\x64\Release\VeraCore.Audio.lib";%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ClCompile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio;C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\VeraCore\3rdparty\portaudio\include;$(MSBuildProjectDirectory)\..\3rdparty\vst3sdk;$(MSBuildProjectDirectory)\..\3rdparty\vst2sdk\include;$(MSBuildProjectDirectory)\..\3rdparty\clap\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AudioGeneral.cpp" />
+    <ClCompile Include="Preferences.cpp" />
+    <QtRcc Include="VeraCoreQT.qrc" />
+    <QtRcc Include="darkstyle.qrc" />
+    <QtUic Include="Audio.ui" />
+    <QtUic Include="VeraCoreQT.ui" />
+    <QtMoc Include="VeraCoreQT.h" />
+    <ClCompile Include="VeraCoreQT.cpp" />
+    <ClCompile Include="DarkStyle.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Track.cpp" />
+    <ClCompile Include="TrackWidget.cpp" />
+    <ClCompile Include="TransportWidget.cpp" />
+    <ClCompile Include="InspectorWidget.cpp" />
+    <ClCompile Include="PluginManager.cpp" />
+    <ClCompile Include="PluginLoader.cpp" />
+    <ClCompile Include="PluginScannerWorker.cpp" />
+    <ClCompile Include="PlaylistView.cpp" />
+    <QtUic Include="Files.ui" />
+    <QtUic Include="General.ui" />
+    <QtUic Include="MIDI.ui" />
+    <QtUic Include="Plugins.ui" />
+    <QtUic Include="SettingsDialog.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="DarkStyle.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="darkstyle\darkstyle.qss" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Preferences.h" />
+    <QtMoc Include="TrackWidget.h" />
+    <QtMoc Include="TransportWidget.h" />
+    <QtMoc Include="InspectorWidget.h" />
+    <QtMoc Include="PlaylistView.h" />
+    <QtMoc Include="PluginScannerWorker.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AudioGeneral.h" />
+    <ClInclude Include="Track.h" />
+    <ClInclude Include="PluginManager.h" />
+    <ClInclude Include="PluginLoader.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

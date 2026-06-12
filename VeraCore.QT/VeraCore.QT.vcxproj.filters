@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="VeraCoreQT.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="DarkStyle.cpp" />
+    <ClCompile Include="Preferences.cpp">
+      <Filter>Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioGeneral.cpp" />
+    <ClCompile Include="Track.cpp" />
+    <ClCompile Include="TrackWidget.cpp" />
+    <ClCompile Include="TransportWidget.cpp" />
+    <ClCompile Include="InspectorWidget.cpp" />
+    <ClCompile Include="PluginManager.cpp" />
+    <ClCompile Include="PluginLoader.cpp" />
+    <ClCompile Include="PluginScannerWorker.cpp" />
+    <ClCompile Include="PlaylistView.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="VeraCoreQT.h" />
+    <QtMoc Include="DarkStyle.h" />
+    <QtMoc Include="Preferences.h">
+      <Filter>Settings</Filter>
+    </QtMoc>
+    <QtMoc Include="TrackWidget.h" />
+    <QtMoc Include="TransportWidget.h" />
+    <QtMoc Include="InspectorWidget.h" />
+    <QtMoc Include="PlaylistView.h" />
+    <QtMoc Include="PluginScannerWorker.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="VeraCoreQT.qrc" />
+    <QtRcc Include="darkstyle.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="VeraCoreQT.ui" />
+    <QtUic Include="SettingsDialog.ui">
+      <Filter>Settings</Filter>
+    </QtUic>
+    <QtUic Include="Audio.ui">
+      <Filter>Settings</Filter>
+    </QtUic>
+    <QtUic Include="General.ui">
+      <Filter>Settings</Filter>
+    </QtUic>
+    <QtUic Include="MIDI.ui">
+      <Filter>Settings</Filter>
+    </QtUic>
+    <QtUic Include="Files.ui">
+      <Filter>Settings</Filter>
+    </QtUic>
+    <QtUic Include="Plugins.ui">
+      <Filter>Settings</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="darkstyle\darkstyle.qss" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Settings">
+      <UniqueIdentifier>{834ca361-bc10-4f56-aa69-104419cb09e6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AudioGeneral.h" />
+    <ClInclude Include="Track.h" />
+    <ClInclude Include="PluginManager.h" />
+    <ClInclude Include="PluginLoader.h" />
+  </ItemGroup>
+</Project>
