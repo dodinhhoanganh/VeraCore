@@ -4,6 +4,7 @@
 #include "PluginManager.h"
 #include <QCloseEvent>
 #include <QScrollBar>
+#include <functional>
 
 VeraCoreQT::VeraCoreQT(QWidget *parent)
     : QMainWindow(parent)
@@ -14,18 +15,32 @@ VeraCoreQT::VeraCoreQT(QWidget *parent)
     qRegisterMetaType<PluginInfo>("PluginInfo");
     qRegisterMetaType<std::vector<PluginInfo>>("std::vector<PluginInfo>");
     
-    // Create Inspector Widget
+    // Inspector docks at the bottom of the center area (Ableton-style device
+    // strip under the arrangement), not as a third column.
     m_inspectorWidget = new InspectorWidget(this);
-    ui.mainSplitter->insertWidget(1, m_inspectorWidget);
+    ui.centerSplitter->addWidget(m_inspectorWidget);
 
-    // Set default proportions for Browser, Inspector, Playlist
+    // Browser column left, arrangement gets the remaining space.
+    ui.mainSplitter->setStretchFactor(0, 0);
+    ui.mainSplitter->setStretchFactor(1, 1);
     QList<int> sizes;
-    sizes << 200 << 200 << 600;
+    sizes << 240 << 1040;
     ui.mainSplitter->setSizes(sizes);
-    
+
+    // Arrangement above, inspector strip below.
+    ui.centerSplitter->setStretchFactor(0, 1);
+    ui.centerSplitter->setStretchFactor(1, 0);
+    QList<int> centerSizes;
+    centerSizes << 540 << 170;
+    ui.centerSplitter->setSizes(centerSizes);
+
     QList<int> playlistSizes;
     playlistSizes << 200 << 800;
     ui.playlistSplitter->setSizes(playlistSizes);
+
+    // FL-style instant browser filtering.
+    connect(ui.browserSearch, &QLineEdit::textChanged,
+            this, &VeraCoreQT::onBrowserSearchChanged);
 
     m_transportWidget = new TransportWidget(this);
     ui.verticalLayout->insertWidget(0, m_transportWidget);
@@ -35,6 +50,12 @@ VeraCoreQT::VeraCoreQT(QWidget *parent)
     int playlistIndex = ui.playlistSplitter->indexOf(ui.playlistView);
     ui.playlistView->deleteLater();
     ui.playlistSplitter->insertWidget(playlistIndex, m_playlistView);
+    connect(m_playlistView, &PlaylistView::trackLaneSelected,
+            this, &VeraCoreQT::onPlaylistTrackSelected);
+    connect(m_playlistView, &PlaylistView::midiClipSelected,
+            this, &VeraCoreQT::onMidiClipSelected);
+    connect(m_playlistView, &PlaylistView::midiClipOpened,
+            this, &VeraCoreQT::onMidiClipSelected);
 
     // Sync vertical scrollbars between track headers and playlist
     connect(ui.trackHeadersScroll->verticalScrollBar(), &QScrollBar::valueChanged,
@@ -80,7 +101,7 @@ void VeraCoreQT::addTrack(std::shared_ptr<Track> track) {
     ui.trackHeadersLayout->insertWidget(ui.trackHeadersLayout->count() - 1, trackWidget);
     
     // Update playlist view grid lanes
-    m_playlistView->setTrackCount((int)m_tracks.size());
+    m_playlistView->setTracks(m_tracks);
 }
 
 void VeraCoreQT::onTrackSelected(TrackWidget* selectedWidget, Track* track) {
@@ -93,6 +114,46 @@ void VeraCoreQT::onTrackSelected(TrackWidget* selectedWidget, Track* track) {
     
     selectedWidget->setSelected(true);
     m_inspectorWidget->setTrack(track);
+}
+
+void VeraCoreQT::onPlaylistTrackSelected(int trackIndex) {
+    if (trackIndex < 0 || trackIndex >= (int)m_trackWidgets.size()) {
+        return;
+    }
+
+    onTrackSelected(m_trackWidgets[trackIndex], m_tracks[trackIndex].get());
+}
+
+void VeraCoreQT::onMidiClipSelected(int trackIndex, const QString& name, double startBeat, double lengthBeats) {
+    if (trackIndex < 0 || trackIndex >= (int)m_trackWidgets.size()) {
+        return;
+    }
+
+    onTrackSelected(m_trackWidgets[trackIndex], m_tracks[trackIndex].get());
+    m_inspectorWidget->setMidiClip(name, startBeat, lengthBeats);
+}
+
+void VeraCoreQT::onBrowserSearchChanged(const QString& text)
+{
+    const QString needle = text.trimmed();
+
+    // An item stays visible when it matches or any descendant matches.
+    std::function<bool(QTreeWidgetItem*)> filterItem = [&](QTreeWidgetItem* item) -> bool {
+        bool anyChildVisible = false;
+        for (int i = 0; i < item->childCount(); ++i)
+            anyChildVisible = filterItem(item->child(i)) || anyChildVisible;
+
+        const bool selfMatches = needle.isEmpty() ||
+                                 item->text(0).contains(needle, Qt::CaseInsensitive);
+        const bool visible = selfMatches || anyChildVisible;
+        item->setHidden(!visible);
+        if (!needle.isEmpty() && anyChildVisible)
+            item->setExpanded(true);
+        return visible;
+    };
+
+    for (int i = 0; i < ui.browserTree->topLevelItemCount(); ++i)
+        filterItem(ui.browserTree->topLevelItem(i));
 }
 
 void VeraCoreQT::OnPreferences()

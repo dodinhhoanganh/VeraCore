@@ -32,7 +32,10 @@ private:
     QPushButton* m_muteBtn;
     QPushButton* m_soloBtn;
     QPushButton* m_recBtn;
+    QPushButton* m_monitorBtn;
+    QPushButton* m_deviceBtn;
     QSlider* m_volSlider;
+    QSlider* m_panSlider;
     
     // Slots areas (Moved to Inspector panel in the future)
     void setupUi();

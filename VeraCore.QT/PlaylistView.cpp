@@ -3,6 +3,7 @@
 #include <QScrollBar>
 #include <QStyleOptionGraphicsItem>
 #include <qmath.h>
+#include <algorithm>
 
 PlaylistView::PlaylistView(QWidget* parent)
     : QGraphicsView(parent),
@@ -10,7 +11,13 @@ PlaylistView::PlaylistView(QWidget* parent)
       m_beatsPerMeasure(4),
       m_trackHeight(60), // Match Inspector/Track Header height
       m_timelineHeight(30),
-      m_trackCount(0)
+      m_trackCount(0),
+      m_selectedClipIndex(-1),
+      m_pendingClipDrag(false),
+      m_draggingClipCreate(false),
+      m_dragTrackIndex(-1),
+      m_dragStartBeat(0.0),
+      m_dragCurrentBeat(0.0)
 {
     m_scene = new QGraphicsScene(this);
     setScene(m_scene);
@@ -24,7 +31,7 @@ PlaylistView::PlaylistView(QWidget* parent)
     setFrameShape(QFrame::NoFrame);
     
     // Set darker background color
-    setBackgroundBrush(QColor("#1e1e1e"));
+    setBackgroundBrush(QColor("#1b1b1b"));
 }
 
 PlaylistView::~PlaylistView()
@@ -34,6 +41,7 @@ PlaylistView::~PlaylistView()
 void PlaylistView::setPixelsPerBeat(double ppb)
 {
     m_pixelsPerBeat = qMax(10.0, qMin(ppb, 300.0));
+    updateSceneBounds();
     viewport()->update();
 }
 
@@ -54,13 +62,28 @@ int PlaylistView::getTrackCount() const
     return m_trackCount;
 }
 
+void PlaylistView::setTracks(const std::vector<std::shared_ptr<Track>>& tracks)
+{
+    m_tracks.clear();
+    m_tracks.reserve(tracks.size());
+    for (const auto& track : tracks) {
+        m_tracks.push_back(track.get());
+    }
+    setTrackCount((int)m_tracks.size());
+}
+
 void PlaylistView::updateSceneBounds()
 {
     double minWidth = viewport()->width();
     double minHeight = qMax((int)viewport()->height(), m_trackCount * m_trackHeight + m_timelineHeight);
     
     QRectF itemsRect = scene()->itemsBoundingRect();
-    double finalWidth = qMax(minWidth, itemsRect.right());
+    double clipRight = 0.0;
+    for (const MidiClip& clip : m_midiClips) {
+        clipRight = qMax(clipRight, (clip.startBeat + clip.lengthBeats) * m_pixelsPerBeat + 120.0);
+    }
+
+    double finalWidth = qMax(qMax(minWidth, itemsRect.right()), clipRight);
     double finalHeight = qMax(minHeight, itemsRect.bottom());
     
     setSceneRect(0, 0, finalWidth, finalHeight);
@@ -113,13 +136,13 @@ void PlaylistView::drawBackground(QPainter* painter, const QRectF& rect)
         QRectF laneRect(rect.left(), yPos, rect.width(), m_trackHeight);
         
         if (i % 2 == 0) {
-            painter->fillRect(laneRect, QColor("#222222"));
+            painter->fillRect(laneRect, QColor("#242424"));
         } else {
-            painter->fillRect(laneRect, QColor("#2a2a2a"));
+            painter->fillRect(laneRect, QColor("#282828"));
         }
-        
+
         // Draw bottom border for lane
-        painter->setPen(QColor("#111111"));
+        painter->setPen(QColor("#151515"));
         painter->drawLine(QPointF(rect.left(), yPos + m_trackHeight - 1), QPointF(rect.right(), yPos + m_trackHeight - 1));
     }
 
@@ -130,13 +153,13 @@ void PlaylistView::drawBackground(QPainter* painter, const QRectF& rect)
     int endBeat = qCeil(rect.right() / m_pixelsPerBeat);
     
     // Configure pens
-    QPen measurePen(QColor("#555555"), 1);
-    QPen beatPen(QColor("#333333"), 1);
-    
+    QPen measurePen(QColor("#4a4a4a"), 1);
+    QPen beatPen(QColor("#303030"), 1);
+
     // Sub-beat dots
     QVector<qreal> dashes;
     dashes << 1 << 3;
-    QPen subBeatPen(QColor("#333333"), 1);
+    QPen subBeatPen(QColor("#303030"), 1);
     subBeatPen.setDashPattern(dashes);
     
     for (int b = qMax(0, startBeat); b <= endBeat; ++b) {
@@ -163,6 +186,41 @@ void PlaylistView::drawBackground(QPainter* painter, const QRectF& rect)
         }
     }
 
+    QFont clipFont = painter->font();
+    clipFont.setPointSize(8);
+    clipFont.setBold(true);
+    painter->setFont(clipFont);
+
+    for (int i = 0; i < (int)m_midiClips.size(); ++i) {
+        const MidiClip& clip = m_midiClips[i];
+        QRectF r = clipRect(clip);
+        if (!rect.intersects(r)) {
+            continue;
+        }
+
+        const bool selected = (i == m_selectedClipIndex);
+        painter->setPen(QPen(selected ? QColor("#ff9020") : QColor("#2d6f78"), selected ? 2 : 1));
+        painter->setBrush(QColor(selected ? "#346f78" : "#255f68"));
+        painter->drawRoundedRect(r.adjusted(0.5, 0.5, -0.5, -0.5), 3, 3);
+
+        painter->setPen(QColor("#dff7fa"));
+        painter->drawText(r.adjusted(8, 2, -6, -2), Qt::AlignLeft | Qt::AlignVCenter, clip.name);
+    }
+
+    if (m_draggingClipCreate && m_dragTrackIndex >= 0) {
+        double start = qMin(m_dragStartBeat, m_dragCurrentBeat);
+        double end = qMax(m_dragStartBeat, m_dragCurrentBeat);
+        if (end - start < 1.0) {
+            end = start + 1.0;
+        }
+
+        MidiClip preview{m_dragTrackIndex, start, end - start, "MIDI"};
+        QRectF r = clipRect(preview);
+        painter->setPen(QPen(QColor("#ff9020"), 1, Qt::DashLine));
+        painter->setBrush(QColor(86, 182, 194, 70));
+        painter->drawRoundedRect(r.adjusted(0.5, 0.5, -0.5, -0.5), 3, 3);
+    }
+
     painter->restore();
 }
 
@@ -178,10 +236,10 @@ void PlaylistView::drawForeground(QPainter* painter, const QRectF& rect)
     QRect timelineRect(0, 0, viewportRect.width(), m_timelineHeight);
 
     // Fill background for timeline
-    painter->fillRect(timelineRect, QColor("#1e1e1e"));
-    
+    painter->fillRect(timelineRect, QColor("#202020"));
+
     // Draw bottom border
-    painter->setPen(QColor("#444444"));
+    painter->setPen(QColor("#000000"));
     painter->drawLine(0, m_timelineHeight - 1, viewportRect.width(), m_timelineHeight - 1);
 
     // Calculate scroll offset to map viewport X to scene X
@@ -227,4 +285,201 @@ void PlaylistView::drawForeground(QPainter* painter, const QRectF& rect)
     }
 
     painter->restore();
+}
+
+void PlaylistView::mousePressEvent(QMouseEvent* event)
+{
+    if (event->button() != Qt::LeftButton) {
+        QGraphicsView::mousePressEvent(event);
+        return;
+    }
+
+    const QPointF scenePos = mapToScene(event->pos());
+    const int clipIndex = clipAt(scenePos);
+    if (clipIndex >= 0) {
+        selectClip(clipIndex, false);
+        event->accept();
+        return;
+    }
+
+    const int trackIndex = trackIndexAt(scenePos);
+    if (trackIndex >= 0) {
+        m_selectedClipIndex = -1;
+        emit trackLaneSelected(trackIndex);
+
+        if (isMidiTrack(trackIndex)) {
+            m_pendingClipDrag = true;
+            m_draggingClipCreate = false;
+            m_dragTrackIndex = trackIndex;
+            m_dragStartBeat = snapBeat(beatAtX(scenePos.x()));
+            m_dragCurrentBeat = m_dragStartBeat;
+            m_dragStartPos = event->pos();
+        }
+
+        viewport()->update();
+        event->accept();
+        return;
+    }
+
+    clearClipDrag();
+    QGraphicsView::mousePressEvent(event);
+}
+
+void PlaylistView::mouseMoveEvent(QMouseEvent* event)
+{
+    if (!m_pendingClipDrag || !(event->buttons() & Qt::LeftButton)) {
+        QGraphicsView::mouseMoveEvent(event);
+        return;
+    }
+
+    if ((event->pos() - m_dragStartPos).manhattanLength() > 3) {
+        m_draggingClipCreate = true;
+    }
+
+    if (m_draggingClipCreate) {
+        m_dragCurrentBeat = snapBeat(beatAtX(mapToScene(event->pos()).x()));
+        viewport()->update();
+    }
+
+    event->accept();
+}
+
+void PlaylistView::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (!m_pendingClipDrag || event->button() != Qt::LeftButton) {
+        QGraphicsView::mouseReleaseEvent(event);
+        return;
+    }
+
+    if (m_draggingClipCreate && m_dragTrackIndex >= 0) {
+        double start = qMin(m_dragStartBeat, m_dragCurrentBeat);
+        double end = qMax(m_dragStartBeat, m_dragCurrentBeat);
+        if (end - start < 1.0) {
+            end = start + 1.0;
+        }
+
+        const int clipIndex = createMidiClip(m_dragTrackIndex, start, end - start);
+        selectClip(clipIndex, false);
+    }
+
+    clearClipDrag();
+    event->accept();
+}
+
+void PlaylistView::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    if (event->button() != Qt::LeftButton) {
+        QGraphicsView::mouseDoubleClickEvent(event);
+        return;
+    }
+
+    const QPointF scenePos = mapToScene(event->pos());
+    const int clipIndex = clipAt(scenePos);
+    if (clipIndex >= 0) {
+        selectClip(clipIndex, true);
+        event->accept();
+        return;
+    }
+
+    const int trackIndex = trackIndexAt(scenePos);
+    if (isMidiTrack(trackIndex)) {
+        const double startBeat = snapBeat(beatAtX(scenePos.x()));
+        const int newClipIndex = createMidiClip(trackIndex, startBeat, 4.0);
+        selectClip(newClipIndex, true);
+        event->accept();
+        return;
+    }
+
+    QGraphicsView::mouseDoubleClickEvent(event);
+}
+
+int PlaylistView::trackIndexAt(const QPointF& scenePos) const
+{
+    const double laneY = scenePos.y() - m_timelineHeight;
+    if (laneY < 0.0) {
+        return -1;
+    }
+
+    const int trackIndex = qFloor(laneY / m_trackHeight);
+    return (trackIndex >= 0 && trackIndex < m_trackCount) ? trackIndex : -1;
+}
+
+bool PlaylistView::isMidiTrack(int trackIndex) const
+{
+    return trackIndex >= 0 &&
+           trackIndex < (int)m_tracks.size() &&
+           m_tracks[trackIndex] &&
+           m_tracks[trackIndex]->GetType() == TrackType::Midi;
+}
+
+double PlaylistView::beatAtX(double sceneX) const
+{
+    return qMax(0.0, sceneX / m_pixelsPerBeat);
+}
+
+double PlaylistView::snapBeat(double beat) const
+{
+    return qMax(0.0, static_cast<double>(qRound(beat)));
+}
+
+QRectF PlaylistView::clipRect(const MidiClip& clip) const
+{
+    const double x = clip.startBeat * m_pixelsPerBeat;
+    const double y = m_timelineHeight + clip.trackIndex * m_trackHeight + 7;
+    const double w = qMax(1.0, clip.lengthBeats * m_pixelsPerBeat);
+    const double h = m_trackHeight - 14;
+    return QRectF(x, y, w, h);
+}
+
+int PlaylistView::clipAt(const QPointF& scenePos) const
+{
+    for (int i = (int)m_midiClips.size() - 1; i >= 0; --i) {
+        if (clipRect(m_midiClips[i]).contains(scenePos)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int PlaylistView::createMidiClip(int trackIndex, double startBeat, double lengthBeats)
+{
+    if (!isMidiTrack(trackIndex)) {
+        return -1;
+    }
+
+    MidiClip clip;
+    clip.trackIndex = trackIndex;
+    clip.startBeat = qMax(0.0, startBeat);
+    clip.lengthBeats = qMax(1.0, lengthBeats);
+    clip.name = QString("MIDI %1").arg((int)m_midiClips.size() + 1);
+    m_midiClips.push_back(clip);
+
+    updateSceneBounds();
+    viewport()->update();
+    return (int)m_midiClips.size() - 1;
+}
+
+void PlaylistView::selectClip(int clipIndex, bool opened)
+{
+    if (clipIndex < 0 || clipIndex >= (int)m_midiClips.size()) {
+        return;
+    }
+
+    m_selectedClipIndex = clipIndex;
+    const MidiClip& clip = m_midiClips[clipIndex];
+    emit trackLaneSelected(clip.trackIndex);
+    emit midiClipSelected(clip.trackIndex, clip.name, clip.startBeat, clip.lengthBeats);
+    if (opened) {
+        emit midiClipOpened(clip.trackIndex, clip.name, clip.startBeat, clip.lengthBeats);
+    }
+    viewport()->update();
+}
+
+void PlaylistView::clearClipDrag()
+{
+    m_pendingClipDrag = false;
+    m_draggingClipCreate = false;
+    m_dragTrackIndex = -1;
+    m_dragStartBeat = 0.0;
+    m_dragCurrentBeat = 0.0;
 }

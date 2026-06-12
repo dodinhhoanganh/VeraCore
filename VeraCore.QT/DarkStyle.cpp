@@ -26,28 +26,28 @@ QStyle *DarkStyle::styleBase(QStyle *style) const {
 QStyle *DarkStyle::baseStyle() const { return styleBase(); }
 
 void DarkStyle::polish(QPalette &palette) {
-  // modify palette to dark
-  palette.setColor(QPalette::Window, QColor(53, 53, 53));
-  palette.setColor(QPalette::WindowText, Qt::white);
+  // Flat dark surfaces (Ableton) with an orange accent (FL Studio).
+  palette.setColor(QPalette::Window, QColor(37, 37, 37));
+  palette.setColor(QPalette::WindowText, QColor(230, 230, 230));
   palette.setColor(QPalette::Disabled, QPalette::WindowText,
-                   QColor(127, 127, 127));
-  palette.setColor(QPalette::Base, QColor(42, 42, 42));
-  palette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
-  palette.setColor(QPalette::ToolTipBase, Qt::white);
-  palette.setColor(QPalette::ToolTipText, QColor(53, 53, 53));
-  palette.setColor(QPalette::Text, Qt::white);
-  palette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
-  palette.setColor(QPalette::Dark, QColor(35, 35, 35));
-  palette.setColor(QPalette::Shadow, QColor(20, 20, 20));
-  palette.setColor(QPalette::Button, QColor(53, 53, 53));
-  palette.setColor(QPalette::ButtonText, Qt::white);
+                   QColor(120, 120, 120));
+  palette.setColor(QPalette::Base, QColor(26, 26, 26));
+  palette.setColor(QPalette::AlternateBase, QColor(45, 45, 45));
+  palette.setColor(QPalette::ToolTipBase, QColor(26, 26, 26));
+  palette.setColor(QPalette::ToolTipText, QColor(230, 230, 230));
+  palette.setColor(QPalette::Text, QColor(230, 230, 230));
+  palette.setColor(QPalette::Disabled, QPalette::Text, QColor(120, 120, 120));
+  palette.setColor(QPalette::Dark, QColor(22, 22, 22));
+  palette.setColor(QPalette::Shadow, QColor(10, 10, 10));
+  palette.setColor(QPalette::Button, QColor(45, 45, 45));
+  palette.setColor(QPalette::ButtonText, QColor(230, 230, 230));
   palette.setColor(QPalette::Disabled, QPalette::ButtonText,
-                   QColor(127, 127, 127));
+                   QColor(120, 120, 120));
   palette.setColor(QPalette::BrightText, Qt::red);
-  palette.setColor(QPalette::Link, QColor(42, 130, 218));
-  palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+  palette.setColor(QPalette::Link, QColor(255, 160, 64));
+  palette.setColor(QPalette::Highlight, QColor(255, 144, 32));
   palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
-  palette.setColor(QPalette::HighlightedText, Qt::white);
+  palette.setColor(QPalette::HighlightedText, QColor(20, 20, 20));
   palette.setColor(QPalette::Disabled, QPalette::HighlightedText,
                    QColor(127, 127, 127));
 }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>853</width>
-    <height>550</height>
+    <width>1280</width>
+    <height>760</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,111 +35,160 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QTreeWidget" name="browserTree">
-       <property name="headerHidden">
+      <property name="childrenCollapsible">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="browserPanel">
+       <layout class="QVBoxLayout" name="browserPanelLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="browserHeader">
+          <property name="text">
+           <string>BROWSER</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="browserSearch">
+          <property name="placeholderText">
+           <string>Search plugins &amp; samples…</string>
+          </property>
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="browserTree">
+          <property name="headerHidden">
+           <bool>true</bool>
+          </property>
+          <column>
+           <property name="text">
+            <string>Browser</string>
+           </property>
+          </column>
+          <item>
+           <property name="text">
+            <string>Plugins</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Audio Plugins</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Clap</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>VST3</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>VST</string>
+             </property>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>Generator Plugins</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Clap</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>VST3</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>VST</string>
+             </property>
+            </item>
+           </item>
+          </item>
+          <item>
+           <property name="text">
+            <string>Sample Packs</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QSplitter" name="centerSplitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="childrenCollapsible">
         <bool>true</bool>
        </property>
-       <column>
-        <property name="text">
-         <string>Browser</string>
+       <widget class="QSplitter" name="playlistSplitter">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </column>
-       <item>
-        <property name="text">
-         <string>Plugins</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>Audio Plugins</string>
+        <widget class="QScrollArea" name="trackHeadersScroll">
+         <property name="widgetResizable">
+          <bool>true</bool>
          </property>
-         <item>
-          <property name="text">
-           <string>Clap</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>VST3</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>VST</string>
-          </property>
-         </item>
-        </item>
-        <item>
-         <property name="text">
-          <string>Generator Plugins</string>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
          </property>
-         <item>
-          <property name="text">
-           <string>Clap</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>VST3</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>VST</string>
-          </property>
-         </item>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Sample Packs</string>
-        </property>
-       </item>
-      </widget>
-      <widget class="QSplitter" name="playlistSplitter">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <widget class="QScrollArea" name="trackHeadersScroll">
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <widget class="QWidget" name="trackHeadersContainer">
-         <layout class="QVBoxLayout" name="trackHeadersLayout">
-          <property name="spacing">
-           <number>2</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <spacer name="trackHeadersSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
+         <widget class="QWidget" name="trackHeadersContainer">
+          <layout class="QVBoxLayout" name="trackHeadersLayout">
+           <property name="spacing">
+            <number>2</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <spacer name="trackHeadersSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
         </widget>
-       </widget>
-       <widget class="QGraphicsView" name="playlistView">
+        <widget class="QGraphicsView" name="playlistView">
+        </widget>
        </widget>
       </widget>
      </widget>
@@ -151,7 +200,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>853</width>
+     <width>1280</width>
      <height>22</height>
     </rect>
    </property>

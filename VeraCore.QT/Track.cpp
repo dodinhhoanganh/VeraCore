@@ -7,6 +7,8 @@ Track::Track(const QString& name, TrackType type)
     , m_pan(0.0f)
     , m_isMuted(false)
     , m_isSoloed(false)
+    , m_isArmed(false)
+    , m_isMonitoring(false)
 {
 }
 
@@ -25,6 +27,12 @@ void Track::SetMuted(bool muted) { m_isMuted = muted; }
 
 bool Track::IsSoloed() const { return m_isSoloed; }
 void Track::SetSoloed(bool soloed) { m_isSoloed = soloed; }
+
+bool Track::IsArmed() const { return m_isArmed; }
+void Track::SetArmed(bool armed) { m_isArmed = armed; }
+
+bool Track::IsMonitoring() const { return m_isMonitoring; }
+void Track::SetMonitoring(bool monitoring) { m_isMonitoring = monitoring; }
 
 std::vector<QString> Track::GetAudioFxSlots() const { return m_audioFxSlots; }
 void Track::AddAudioFx(const QString& fxName) { m_audioFxSlots.push_back(fxName); }

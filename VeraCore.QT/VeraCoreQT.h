@@ -42,4 +42,7 @@ private:
 
 private slots:
     void onTrackSelected(TrackWidget* widget, Track* track);
+    void onBrowserSearchChanged(const QString& text);
+    void onPlaylistTrackSelected(int trackIndex);
+    void onMidiClipSelected(int trackIndex, const QString& name, double startBeat, double lengthBeats);
 };

@@ -8,92 +8,104 @@ TransportWidget::TransportWidget(QWidget* parent)
 }
 
 void TransportWidget::setupUi() {
-    this->setFixedHeight(50);
+    this->setFixedHeight(56);
     this->setObjectName("TransportWidget");
-    this->setStyleSheet("#TransportWidget { background-color: #2b2b2b; border-bottom: 1px solid #111; }");
+    this->setStyleSheet("#TransportWidget { background-color: #1f1f1f; border-bottom: 1px solid #000; }");
 
     QHBoxLayout* mainLayout = new QHBoxLayout(this);
-    mainLayout->setContentsMargins(10, 5, 10, 5);
-    mainLayout->setSpacing(20);
+    mainLayout->setContentsMargins(12, 6, 12, 6);
+    mainLayout->setSpacing(0);
 
-    // 1. Transport Controls (Play, Pause, Stop, Record)
+    // 1. Transport controls
     QHBoxLayout* transportLayout = new QHBoxLayout();
-    transportLayout->setSpacing(5);
+    transportLayout->setSpacing(4);
 
-    QString btnStyle = "QPushButton { background-color: #3a3a3a; border: 1px solid #222; border-radius: 3px; color: #eee; font-weight: bold; width: 30px; height: 30px; } "
-                       "QPushButton:hover { background-color: #4a4a4a; } "
-                       "QPushButton:pressed { background-color: #222; }";
+    const QString btnStyle =
+        "QPushButton { background-color: #2a2a2a; border: 1px solid #161616; "
+        "border-radius: 4px; color: #eee; font-weight: bold; width: 34px; height: 34px; } "
+        "QPushButton:hover { background-color: #3a3a3a; } "
+        "QPushButton:pressed { background-color: #161616; }";
 
-    m_playBtn = new QPushButton(">", this);
-    m_playBtn->setStyleSheet(btnStyle + "QPushButton { color: #4CAF50; font-size: 16px; }");
-    
-    m_pauseBtn = new QPushButton("||", this);
-    m_pauseBtn->setStyleSheet(btnStyle + "QPushButton { color: #FFC107; }");
-    
-    m_stopBtn = new QPushButton("[]", this);
-    m_stopBtn->setStyleSheet(btnStyle + "QPushButton { color: #F44336; }");
+    // Glyphs are UTF-8 hex escapes so the file stays codepage-proof under MSVC.
+    m_stopBtn = new QPushButton(QString::fromUtf8("\xE2\x96\xA0"), this); // BLACK SQUARE
+    m_stopBtn->setToolTip("Stop");
+    m_stopBtn->setStyleSheet(btnStyle + "QPushButton { color: #c8c8c8; font-size: 13px; }");
 
-    m_recordBtn = new QPushButton("O", this);
-    m_recordBtn->setStyleSheet(btnStyle + "QPushButton { color: #F44336; border-radius: 15px; font-size: 14px; } QPushButton:checked { background-color: #F44336; color: white; }");
+    m_playBtn = new QPushButton(QString::fromUtf8("\xE2\x96\xB6"), this); // BLACK RIGHT TRIANGLE
+    m_playBtn->setToolTip("Play");
+    m_playBtn->setStyleSheet(btnStyle + "QPushButton { color: #6fcf73; font-size: 15px; } "
+                                        "QPushButton:hover { color: #8fef93; }");
+
+    m_pauseBtn = new QPushButton(QString::fromUtf8("\xE2\x9D\x9A\xE2\x9D\x9A"), this); // HEAVY VERTICAL BARS
+    m_pauseBtn->setToolTip("Pause");
+    m_pauseBtn->setStyleSheet(btnStyle + "QPushButton { color: #ffc107; font-size: 11px; }");
+
+    m_recordBtn = new QPushButton(QString::fromUtf8("\xE2\x97\x8F"), this); // BLACK CIRCLE
+    m_recordBtn->setToolTip("Record");
     m_recordBtn->setCheckable(true);
+    m_recordBtn->setStyleSheet(btnStyle +
+        "QPushButton { color: #e04a3a; border-radius: 17px; font-size: 14px; } "
+        "QPushButton:checked { background-color: #e04a3a; color: white; }");
 
     transportLayout->addWidget(m_stopBtn);
     transportLayout->addWidget(m_playBtn);
     transportLayout->addWidget(m_pauseBtn);
     transportLayout->addWidget(m_recordBtn);
 
-    mainLayout->addLayout(transportLayout);
-
-    // 2. Time Display (LCD style)
+    // 2. Time display, FL-style LCD with the orange accent
     QFrame* timeFrame = new QFrame(this);
-    timeFrame->setStyleSheet("QFrame { background-color: #1a1a1a; border: 1px inset #111; border-radius: 3px; padding: 2px 10px; }");
+    timeFrame->setStyleSheet("QFrame { background-color: #121212; border: 1px solid #000; "
+                             "border-radius: 4px; padding: 2px 12px; }");
     QHBoxLayout* timeLayout = new QHBoxLayout(timeFrame);
     timeLayout->setContentsMargins(0, 0, 0, 0);
 
     m_timeDisplay = new QLabel(" 1. 1. 1. 00 ", timeFrame);
-    m_timeDisplay->setStyleSheet("color: #00FFCC; font-family: 'Consolas', monospace; font-size: 20px; font-weight: bold;");
+    m_timeDisplay->setStyleSheet("color: #ffa040; font-family: 'Consolas', monospace; "
+                                 "font-size: 20px; font-weight: bold; border: none;");
     timeLayout->addWidget(m_timeDisplay);
 
-    mainLayout->addWidget(timeFrame);
-
-    // 3. Project Settings (Tempo, Signature, Metronome, Key)
+    // 3. Project settings (tempo, signature, metronome, key)
     QHBoxLayout* settingsLayout = new QHBoxLayout();
     settingsLayout->setSpacing(10);
-    
-    QString comboStyle = "QComboBox, QDoubleSpinBox { background-color: #333; color: white; border: 1px solid #222; border-radius: 2px; padding: 2px 5px; height: 24px; }";
+
+    const QString comboStyle =
+        "QComboBox, QDoubleSpinBox { background-color: #2a2a2a; color: #e8e8e8; "
+        "border: 1px solid #161616; border-radius: 3px; padding: 2px 5px; height: 24px; } "
+        "QComboBox:hover, QDoubleSpinBox:hover { border-color: #ff9020; }";
+    const QString labelStyle = "color: #9a9a9a; font-size: 9px; font-weight: bold;";
 
     // Tempo
     QHBoxLayout* tempoLayout = new QHBoxLayout();
-    tempoLayout->setSpacing(2);
+    tempoLayout->setSpacing(4);
     QLabel* tempoLbl = new QLabel("TEMPO", this);
-    tempoLbl->setStyleSheet("color: #aaa; font-size: 9px; font-weight: bold;");
+    tempoLbl->setStyleSheet(labelStyle);
     m_tempoSpin = new QDoubleSpinBox(this);
     m_tempoSpin->setRange(20.0, 300.0);
     m_tempoSpin->setValue(120.00);
     m_tempoSpin->setDecimals(2);
-    m_tempoSpin->setStyleSheet(comboStyle + "QDoubleSpinBox { width: 60px; }");
+    m_tempoSpin->setStyleSheet(comboStyle + "QDoubleSpinBox { width: 64px; }");
     tempoLayout->addWidget(tempoLbl);
     tempoLayout->addWidget(m_tempoSpin);
     settingsLayout->addLayout(tempoLayout);
 
     // Signature
     QHBoxLayout* sigLayout = new QHBoxLayout();
-    sigLayout->setSpacing(2);
-    QLabel* sigLbl = new QLabel("SIGNATURE", this);
-    sigLbl->setStyleSheet("color: #aaa; font-size: 9px; font-weight: bold;");
-    
+    sigLayout->setSpacing(4);
+    QLabel* sigLbl = new QLabel("SIG", this);
+    sigLbl->setStyleSheet(labelStyle);
+
     m_signatureNum = new QComboBox(this);
-    for (int i=1; i<=16; ++i) m_signatureNum->addItem(QString::number(i));
+    for (int i = 1; i <= 16; ++i) m_signatureNum->addItem(QString::number(i));
     m_signatureNum->setCurrentText("4");
-    m_signatureNum->setStyleSheet(comboStyle + "QComboBox { width: 30px; }");
+    m_signatureNum->setStyleSheet(comboStyle + "QComboBox { width: 34px; }");
 
     QLabel* slashLbl = new QLabel("/", this);
-    slashLbl->setStyleSheet("color: #888;");
+    slashLbl->setStyleSheet("color: #777;");
 
     m_signatureDen = new QComboBox(this);
     m_signatureDen->addItems({"2", "4", "8", "16", "32"});
     m_signatureDen->setCurrentText("4");
-    m_signatureDen->setStyleSheet(comboStyle + "QComboBox { width: 30px; }");
+    m_signatureDen->setStyleSheet(comboStyle + "QComboBox { width: 34px; }");
 
     sigLayout->addWidget(sigLbl);
     sigLayout->addWidget(m_signatureNum);
@@ -104,20 +116,24 @@ void TransportWidget::setupUi() {
     // Metronome
     m_metronomeBtn = new QPushButton("Click", this);
     m_metronomeBtn->setCheckable(true);
-    m_metronomeBtn->setStyleSheet("QPushButton { background-color: #3a3a3a; border: 1px solid #222; border-radius: 2px; color: #aaa; padding: 2px 8px; height: 24px; } "
-                                  "QPushButton:checked { background-color: #4CAF50; color: white; font-weight: bold; }");
+    m_metronomeBtn->setToolTip("Metronome");
+    m_metronomeBtn->setStyleSheet(
+        "QPushButton { background-color: #2a2a2a; border: 1px solid #161616; border-radius: 3px; "
+        "color: #9a9a9a; padding: 2px 10px; height: 24px; } "
+        "QPushButton:hover { background-color: #3a3a3a; } "
+        "QPushButton:checked { background-color: #ff9020; color: #141414; font-weight: bold; }");
     settingsLayout->addWidget(m_metronomeBtn);
 
     // Key / Scale
     QHBoxLayout* keyLayout = new QHBoxLayout();
-    keyLayout->setSpacing(2);
+    keyLayout->setSpacing(4);
     QLabel* keyLbl = new QLabel("KEY", this);
-    keyLbl->setStyleSheet("color: #aaa; font-size: 9px; font-weight: bold;");
-    
+    keyLbl->setStyleSheet(labelStyle);
+
     m_keyNote = new QComboBox(this);
     m_keyNote->addItems({"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"});
     m_keyNote->setStyleSheet(comboStyle);
-    
+
     m_keyScale = new QComboBox(this);
     m_keyScale->addItems({"Major", "Minor"});
     m_keyScale->setStyleSheet(comboStyle);
@@ -127,12 +143,12 @@ void TransportWidget::setupUi() {
     keyLayout->addWidget(m_keyScale);
     settingsLayout->addLayout(keyLayout);
 
-    // Center everything
+    // Single, centered assembly. Each layout is added exactly once.
     mainLayout->addStretch();
     mainLayout->addLayout(transportLayout);
-    mainLayout->addSpacing(30);
+    mainLayout->addSpacing(24);
     mainLayout->addWidget(timeFrame);
-    mainLayout->addSpacing(30);
+    mainLayout->addSpacing(24);
     mainLayout->addLayout(settingsLayout);
     mainLayout->addStretch();
 }

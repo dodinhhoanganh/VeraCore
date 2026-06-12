@@ -15,15 +15,24 @@ static int Process(const void* inputBuffer,
     PaStreamCallbackFlags statusFlags,
     void* userData)
 {
-    float* out = (float*)outputBuffer;
-    float* in = (float*)inputBuffer;
+    (void)timeInfo;
+    (void)statusFlags;
+    (void)userData;
 
-    for (int i = 0; i < framesCount; i++)
-    {
-        *out++ = *in++; 
-        *out++ = *in++; 
+    float* out = static_cast<float*>(outputBuffer);
+    const float* in = static_cast<const float*>(inputBuffer);
+    if (!out) {
+        return paContinue;
     }
-    return 0;
+
+    const size_t sampleCount = static_cast<size_t>(framesCount) * 2;
+    if (!in) {
+        std::fill_n(out, sampleCount, 0.0f);
+        return paContinue;
+    }
+
+    std::copy_n(in, sampleCount, out);
+    return paContinue;
 }
 PaError VeraCoreAudio::OpenStreamASIO(double srate, int devnum) {
     PaError err;

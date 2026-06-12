@@ -29,6 +29,12 @@ public:
     bool IsSoloed() const;
     void SetSoloed(bool soloed);
 
+    bool IsArmed() const;
+    void SetArmed(bool armed);
+
+    bool IsMonitoring() const;
+    void SetMonitoring(bool monitoring);
+
     std::vector<QString> GetAudioFxSlots() const;
     void AddAudioFx(const QString& fxName);
 
@@ -39,6 +45,8 @@ protected:
     float m_pan;
     bool m_isMuted;
     bool m_isSoloed;
+    bool m_isArmed;
+    bool m_isMonitoring;
     std::vector<QString> m_audioFxSlots;
 };
 
