@@ -66,12 +66,90 @@
      <rect>
       <x>10</x>
       <y>300</y>
-      <width>75</width>
+      <width>105</width>
       <height>24</height>
      </rect>
     </property>
     <property name="text">
-     <string>Scan</string>
+     <string>Scan Changed</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="scanProgress">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>300</y>
+      <width>221</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="scanStatus">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>300</y>
+      <width>201</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Idle</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="scannerSafetyGroup">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>355</y>
+     <width>721</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Scanner Safety</string>
+   </property>
+   <widget class="QPushButton" name="rescanBtn">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>35</y>
+      <width>111</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Rescan All</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="clearQuarantineBtn">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>35</y>
+      <width>151</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clear Quarantine</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="quarantineStatus">
+    <property name="geometry">
+     <rect>
+      <x>295</x>
+      <y>35</y>
+      <width>416</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>No quarantined plug-ins</string>
     </property>
    </widget>
   </widget>

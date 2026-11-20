@@ -12,10 +12,31 @@
     <ClCompile Include="TrackWidget.cpp" />
     <ClCompile Include="TransportWidget.cpp" />
     <ClCompile Include="InspectorWidget.cpp" />
+    <ClCompile Include="AudioEditorWidget.cpp" />
     <ClCompile Include="PluginManager.cpp" />
     <ClCompile Include="PluginLoader.cpp" />
     <ClCompile Include="PluginScannerWorker.cpp" />
+    <ClCompile Include="AudioFileDecoder.cpp" />
+    <ClCompile Include="AudioCodecBackend.cpp" />
+    <ClCompile Include="NativeAudioCodecBackend.cpp" />
+    <ClCompile Include="FfmpegAudioCodecBackend.cpp" />
+    <ClCompile Include="ExternalPluginHost.cpp" />
+    <ClCompile Include="..\3rdparty\vst3sdk\pluginterfaces\base\coreiids.cpp" />
+    <ClCompile Include="..\3rdparty\vst3sdk\public.sdk\source\vst\vstinitiids.cpp" />
+    <ClCompile Include="AudioStretchBackend.cpp" />
+    <ClCompile Include="SampleScannerWorker.cpp" />
     <ClCompile Include="PlaylistView.cpp" />
+    <ClCompile Include="MidiEditorWindow.cpp" />
+    <ClCompile Include="SelectionService.cpp" />
+    <ClCompile Include="CommandRegistry.cpp" />
+    <ClCompile Include="MixerParameterService.cpp" />
+    <ClCompile Include="WorkspaceManager.cpp" />
+    <ClCompile Include="KeymapProfileManager.cpp" />
+    <ClCompile Include="DawTheme.cpp" />
+    <ClCompile Include="ProjectJsonMerge.cpp" />
+    <ClCompile Include="AudioMediaResolver.cpp" />
+    <ClCompile Include="AudioTempoAnalysis.cpp" />
+    <ClCompile Include="StemSeparationService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="VeraCoreQT.h" />
@@ -26,8 +47,16 @@
     <QtMoc Include="TrackWidget.h" />
     <QtMoc Include="TransportWidget.h" />
     <QtMoc Include="InspectorWidget.h" />
+    <QtMoc Include="AudioEditorWidget.h" />
     <QtMoc Include="PlaylistView.h" />
     <QtMoc Include="PluginScannerWorker.h" />
+    <QtMoc Include="SampleScannerWorker.h" />
+    <QtMoc Include="SelectionService.h" />
+    <QtMoc Include="CommandRegistry.h" />
+    <QtMoc Include="MixerParameterService.h" />
+    <QtMoc Include="WorkspaceManager.h" />
+    <QtMoc Include="KeymapProfileManager.h" />
+    <QtMoc Include="StemSeparationService.h" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="VeraCoreQT.qrc" />
@@ -55,6 +84,7 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <None Include="NativeAudioBackends.props.example" />
     <None Include="darkstyle\darkstyle.qss" />
   </ItemGroup>
   <ItemGroup>
@@ -65,7 +95,20 @@
   <ItemGroup>
     <ClInclude Include="AudioGeneral.h" />
     <ClInclude Include="Track.h" />
+    <ClInclude Include="DawTheme.h" />
+    <ClInclude Include="ProjectJsonMerge.h" />
+    <ClInclude Include="AudioMediaResolver.h" />
+    <ClInclude Include="AudioTempoAnalysis.h" />
     <ClInclude Include="PluginManager.h" />
     <ClInclude Include="PluginLoader.h" />
+    <ClInclude Include="AudioFileDecoder.h" />
+    <ClInclude Include="AudioNativeBackendConfig.h" />
+    <ClInclude Include="AudioCodecBackend.h" />
+    <ClInclude Include="NativeAudioCodecBackend.h" />
+    <ClInclude Include="FfmpegAudioCodecBackend.h" />
+    <ClInclude Include="ExternalPluginHost.h" />
+    <ClInclude Include="AudioStretchBackend.h" />
+    <ClInclude Include="MidiClipModel.h" />
+    <ClInclude Include="MidiEditorWindow.h" />
   </ItemGroup>
 </Project>

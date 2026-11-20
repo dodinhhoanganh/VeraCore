@@ -14,6 +14,7 @@ struct PluginInfo {
     QString version;
     QString category; // "Instrument" or "Effect"
     QString uid;      // VST3 class id (hex), VST2 unique id, CLAP plugin id
+    QString scanFingerprint; // Fast fingerprint of the resolved binary state
 };
 
 class PluginManager {

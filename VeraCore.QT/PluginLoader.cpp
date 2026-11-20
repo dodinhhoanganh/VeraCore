@@ -2,10 +2,20 @@
 
 #include <QDir>
 #include <QDirIterator>
+#include <QCoreApplication>
+#include <QDateTime>
+#include <QElapsedTimer>
+#include <QFile>
 #include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QProcess>
 #include <QSet>
 
+#include <algorithm>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <memory>
 
@@ -26,6 +36,99 @@ namespace {
 //==============================================================================
 
 constexpr int kMaxRawPlugins = 64;
+constexpr qsizetype kMaxHelperOutputBytes = 1024 * 1024;
+constexpr qsizetype kMaxHelperStderrBytes = 64 * 1024;
+constexpr char kScanProtocolPrefix[] = "VERACORE_SCAN_RESULT_V1:";
+
+QJsonObject PluginInfoToJson(const PluginInfo& info)
+{
+    QJsonObject object;
+    object["path"] = info.path;
+    object["name"] = info.name;
+    object["type"] = info.type;
+    object["vendor"] = info.vendor;
+    object["version"] = info.version;
+    object["category"] = info.category;
+    object["uid"] = info.uid;
+    return object;
+}
+
+bool PluginInfoFromJson(const QJsonValue& value, PluginInfo& info)
+{
+    if (!value.isObject()) return false;
+    const QJsonObject object = value.toObject();
+    info.path = object.value("path").toString();
+    info.name = object.value("name").toString().left(1024);
+    info.type = object.value("type").toString().left(256);
+    info.vendor = object.value("vendor").toString().left(1024);
+    info.version = object.value("version").toString().left(256);
+    info.category = object.value("category").toString().left(256);
+    info.uid = object.value("uid").toString().left(1024);
+    return !info.path.isEmpty() && !info.type.isEmpty();
+}
+
+QByteArray EncodePluginInfo(const PluginInfo& info)
+{
+    return QJsonDocument(PluginInfoToJson(info)).toJson(QJsonDocument::Compact)
+        .toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+}
+
+bool DecodePluginInfo(const QByteArray& encoded, PluginInfo& info)
+{
+    if (encoded.isEmpty() || encoded.size() > kMaxHelperOutputBytes) return false;
+    QJsonParseError parseError{};
+    const QJsonDocument document = QJsonDocument::fromJson(
+        QByteArray::fromBase64(encoded, QByteArray::Base64UrlEncoding), &parseError);
+    return parseError.error == QJsonParseError::NoError && document.isObject() &&
+        PluginInfoFromJson(document.object(), info);
+}
+
+QByteArray EncodeScanResults(const std::vector<PluginInfo>& results)
+{
+    QJsonArray array;
+    for (const PluginInfo& info : results) array.append(PluginInfoToJson(info));
+    return QJsonDocument(array).toJson(QJsonDocument::Compact)
+        .toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+}
+
+bool DecodeScanResults(const QByteArray& encoded, const PluginInfo& candidate,
+                       std::vector<PluginInfo>& results)
+{
+    if (encoded.isEmpty() || encoded.size() > kMaxHelperOutputBytes) return false;
+    QJsonParseError parseError{};
+    const QJsonDocument document = QJsonDocument::fromJson(
+        QByteArray::fromBase64(encoded, QByteArray::Base64UrlEncoding), &parseError);
+    if (parseError.error != QJsonParseError::NoError || !document.isArray() ||
+        document.array().size() > kMaxRawPlugins) return false;
+    for (const QJsonValue& value : document.array()) {
+        PluginInfo info;
+        if (!PluginInfoFromJson(value, info) ||
+            QFileInfo(info.path).absoluteFilePath().compare(
+                QFileInfo(candidate.path).absoluteFilePath(), Qt::CaseInsensitive) != 0 ||
+            (!info.type.startsWith("Invalid") &&
+             info.type.compare(candidate.type, Qt::CaseInsensitive) != 0))
+            return false;
+        results.push_back(std::move(info));
+    }
+    return !results.empty();
+}
+
+void AppendBoundedTail(QByteArray& destination, const QByteArray& chunk, qsizetype limit)
+{
+    if (chunk.isEmpty() || limit <= 0) return;
+    destination.append(chunk);
+    if (destination.size() > limit)
+        destination.remove(0, destination.size() - limit);
+}
+
+std::vector<PluginInfo> ScannerFailure(const PluginInfo& candidate, const QString& reason,
+                                       QString* errorText)
+{
+    if (errorText) *errorText = reason;
+    PluginInfo invalid = candidate;
+    invalid.type = QString("Invalid (Scanner %1)").arg(reason.left(160));
+    return {std::move(invalid)};
+}
 
 enum ScanError {
     kScanOk = 0,
@@ -361,6 +464,62 @@ bool IsInsideBundle(const QFileInfo& fileInfo)
     }
 }
 
+QString ResolveX64BundleBinary(const QString& path, const QString& extension)
+{
+    const QFileInfo fileInfo(path);
+    if (fileInfo.isFile())
+        return fileInfo.absoluteFilePath();
+    if (!fileInfo.isDir())
+        return QString();
+
+    const QDir archDir(fileInfo.absoluteFilePath() + "/Contents/x86_64-win");
+    if (!archDir.exists())
+        return QString();
+
+    const QFileInfoList binaries = archDir.entryInfoList(
+        QStringList{ QString("*.%1").arg(extension) }, QDir::Files);
+    return binaries.isEmpty() ? QString() : binaries.first().absoluteFilePath();
+}
+
+bool IsAmd64PeBinary(const QString& path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly) || file.size() < 256)
+        return false;
+
+    IMAGE_DOS_HEADER dosHeader{};
+    if (file.read(reinterpret_cast<char*>(&dosHeader), sizeof(dosHeader)) != sizeof(dosHeader) ||
+        dosHeader.e_magic != IMAGE_DOS_SIGNATURE || dosHeader.e_lfanew <= 0 ||
+        static_cast<qint64>(dosHeader.e_lfanew) + 4 + sizeof(IMAGE_FILE_HEADER) + sizeof(WORD) > file.size())
+        return false;
+
+    if (!file.seek(dosHeader.e_lfanew))
+        return false;
+
+    DWORD signature = 0;
+    IMAGE_FILE_HEADER fileHeader{};
+    WORD optionalMagic = 0;
+    if (file.read(reinterpret_cast<char*>(&signature), sizeof(signature)) != sizeof(signature) ||
+        file.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader)) != sizeof(fileHeader) ||
+        file.read(reinterpret_cast<char*>(&optionalMagic), sizeof(optionalMagic)) != sizeof(optionalMagic))
+        return false;
+
+    return signature == IMAGE_NT_SIGNATURE &&
+        fileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 &&
+        optionalMagic == IMAGE_NT_OPTIONAL_HDR64_MAGIC;
+}
+
+QString ResolveCandidateBinary(const PluginInfo& candidate)
+{
+    if (candidate.type.compare("VST3", Qt::CaseInsensitive) == 0)
+        return ResolveX64BundleBinary(candidate.path, "vst3");
+    if (candidate.type.compare("CLAP", Qt::CaseInsensitive) == 0)
+        return ResolveX64BundleBinary(candidate.path, "clap");
+    if (candidate.type.compare("VST2", Qt::CaseInsensitive) == 0)
+        return QFileInfo(candidate.path).absoluteFilePath();
+    return QString();
+}
+
 } // namespace
 
 //==============================================================================
@@ -369,32 +528,24 @@ bool IsInsideBundle(const QFileInfo& fileInfo)
 
 QString PluginLoader::ResolveVst3Binary(const QString& path)
 {
-    QFileInfo fileInfo(path);
-    if (fileInfo.isFile())
-        return fileInfo.absoluteFilePath();
+    return ResolveX64BundleBinary(path, "vst3");
+}
 
-    if (fileInfo.isDir()) {
-        // Packaged VST3: <name>.vst3/Contents/<arch>-win/<name>.vst3
-        QDir contents(fileInfo.absoluteFilePath() + "/Contents");
-        if (!contents.exists())
-            return QString();
+bool PluginLoader::IsX64Candidate(const PluginInfo& candidate)
+{
+    const QString binaryPath = ResolveCandidateBinary(candidate);
+    return !binaryPath.isEmpty() && IsAmd64PeBinary(binaryPath);
+}
 
-#if defined(_M_ARM64)
-        const QStringList preferredArch = { "arm64-win", "x86_64-win" };
-#else
-        const QStringList preferredArch = { "x86_64-win" };
-#endif
-        for (const QString& arch : preferredArch) {
-            QDir archDir(contents.filePath(arch));
-            if (!archDir.exists())
-                continue;
-            const QFileInfoList binaries =
-                archDir.entryInfoList(QStringList() << "*.vst3", QDir::Files);
-            if (!binaries.isEmpty())
-                return binaries.first().absoluteFilePath();
-        }
-    }
-    return QString();
+QString PluginLoader::CandidateFingerprint(const PluginInfo& candidate)
+{
+    const QString binaryPath = ResolveCandidateBinary(candidate);
+    const QFileInfo binary(binaryPath);
+    if (binaryPath.isEmpty() || !binary.exists() || !binary.isFile()) return QString();
+    return QStringLiteral("v1|%1|%2|%3")
+        .arg(candidate.type.toUpper())
+        .arg(binary.size())
+        .arg(binary.lastModified().toMSecsSinceEpoch());
 }
 
 std::vector<PluginInfo> PluginLoader::ScanBinary(const PluginInfo& candidate)
@@ -418,12 +569,26 @@ std::vector<PluginInfo> PluginLoader::ScanBinary(const PluginInfo& candidate)
     } else if (candidate.type == "CLAP") {
         kind = kKindClap;
         sdkName = "CLAP";
+        binaryPath = ResolveX64BundleBinary(candidate.path, "clap");
+        if (binaryPath.isEmpty()) {
+            PluginInfo invalid = candidate;
+            invalid.type = "Invalid (No 64-bit Binary In CLAP Bundle)";
+            results.push_back(invalid);
+            return results;
+        }
     } else if (candidate.type == "VST2") {
         kind = kKindVst2;
         sdkName = "VST2";
     } else {
         PluginInfo invalid = candidate;
         invalid.type = "Invalid (Unknown Plugin Type)";
+        results.push_back(invalid);
+        return results;
+    }
+
+    if (!IsAmd64PeBinary(binaryPath)) {
+        PluginInfo invalid = candidate;
+        invalid.type = "Invalid (Plugin Is Not x64 AMD64)";
         results.push_back(invalid);
         return results;
     }
@@ -459,9 +624,81 @@ std::vector<PluginInfo> PluginLoader::ScanBinary(const PluginInfo& candidate)
     return results;
 }
 
+std::vector<PluginInfo> PluginLoader::ScanBinaryIsolated(
+    const PluginInfo& candidate, int timeoutMs, QString* errorText)
+{
+    if (errorText) errorText->clear();
+    if (!IsX64Candidate(candidate)) return ScanBinary(candidate);
+    const QString executable = QCoreApplication::applicationFilePath();
+    if (executable.isEmpty() || !QFileInfo::exists(executable))
+        return ScannerFailure(candidate, "helper executable missing", errorText);
+
+    QProcess process;
+    process.setProgram(executable);
+    process.setArguments({QStringLiteral("--veracore-scan-helper"),
+                          QString::fromLatin1(EncodePluginInfo(candidate))});
+    process.setProcessChannelMode(QProcess::SeparateChannels);
+    process.start(QIODevice::ReadOnly);
+    if (!process.waitForStarted(5000))
+        return ScannerFailure(candidate, "failed to start", errorText);
+
+    const int safeTimeout = std::clamp(timeoutMs, 1000, 120000);
+    QElapsedTimer elapsed;
+    elapsed.start();
+    QByteArray standardOutput;
+    QByteArray standardError;
+    while (process.state() != QProcess::NotRunning && elapsed.elapsed() < safeTimeout) {
+        const int remaining = safeTimeout - static_cast<int>(elapsed.elapsed());
+        process.waitForReadyRead(std::clamp(remaining, 1, 100));
+        AppendBoundedTail(standardOutput, process.readAllStandardOutput(), kMaxHelperOutputBytes);
+        AppendBoundedTail(standardError, process.readAllStandardError(), kMaxHelperStderrBytes);
+    }
+    if (process.state() != QProcess::NotRunning) {
+        process.kill();
+        process.waitForFinished(2000);
+        process.readAllStandardOutput();
+        process.readAllStandardError();
+        return ScannerFailure(candidate, QString("timeout after %1 ms").arg(safeTimeout), errorText);
+    }
+    AppendBoundedTail(standardOutput, process.readAllStandardOutput(), kMaxHelperOutputBytes);
+    AppendBoundedTail(standardError, process.readAllStandardError(), kMaxHelperStderrBytes);
+    if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
+        const QString detail = QString::fromUtf8(standardError).trimmed().left(120);
+        return ScannerFailure(candidate,
+            detail.isEmpty() ? QString("crashed/exit %1").arg(process.exitCode())
+                             : QString("exit %1: %2").arg(process.exitCode()).arg(detail),
+            errorText);
+    }
+
+    const QByteArray prefix(kScanProtocolPrefix);
+    const qsizetype marker = standardOutput.lastIndexOf(prefix);
+    if (marker < 0) return ScannerFailure(candidate, "protocol marker missing", errorText);
+    QByteArray payload = standardOutput.mid(marker + prefix.size());
+    const qsizetype newline = payload.indexOf('\n');
+    if (newline >= 0) payload.truncate(newline);
+    payload = payload.trimmed();
+    std::vector<PluginInfo> results;
+    if (!DecodeScanResults(payload, candidate, results))
+        return ScannerFailure(candidate, "invalid protocol payload", errorText);
+    return results;
+}
+
+int PluginLoader::RunScanHelper(const QStringList& args)
+{
+    if (args.size() != 3 || args[1] != QStringLiteral("--veracore-scan-helper")) return 64;
+    PluginInfo candidate;
+    if (!DecodePluginInfo(args[2].toLatin1(), candidate)) return 65;
+    const std::vector<PluginInfo> results = ScanBinary(candidate);
+    const QByteArray line = QByteArray(kScanProtocolPrefix) + EncodeScanResults(results) + '\n';
+    if (std::fwrite(line.constData(), 1, static_cast<size_t>(line.size()), stdout) !=
+        static_cast<size_t>(line.size())) return 74;
+    std::fflush(stdout);
+    return 0;
+}
+
 void PluginLoader::ExtractMetadata(PluginInfo& info)
 {
-    const std::vector<PluginInfo> results = ScanBinary(info);
+    const std::vector<PluginInfo> results = ScanBinaryIsolated(info);
     if (!results.empty())
         info = results.front();
 }
@@ -492,9 +729,11 @@ std::vector<PluginInfo> PluginLoader::CollectCandidates(const QStringList& searc
             const QString suffix = fileInfo.suffix().toLower();
 
             if (fileInfo.isDir()) {
-                // Packaged VST3 bundle directory.
+                // Packaged VST3/CLAP bundle directories.
                 if (suffix == "vst3")
                     addCandidate(fileInfo.absoluteFilePath(), fileInfo.completeBaseName(), "VST3");
+                else if (suffix == "clap")
+                    addCandidate(fileInfo.absoluteFilePath(), fileInfo.completeBaseName(), "CLAP");
                 continue;
             }
 

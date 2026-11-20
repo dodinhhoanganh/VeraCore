@@ -225,6 +225,7 @@
      <addaction name="actionFLAC"/>
      <addaction name="actionMP3"/>
      <addaction name="actionOGG"/>
+     <addaction name="actionWavPack"/>
      <addaction name="actionMIDI_2"/>
      <addaction name="separator"/>
      <addaction name="actionZipped_Project"/>
@@ -336,6 +337,11 @@
   <action name="actionOGG">
    <property name="text">
     <string>OGG</string>
+   </property>
+  </action>
+  <action name="actionWavPack">
+   <property name="text">
+    <string>WavPack</string>
    </property>
   </action>
   <action name="actionMIDI_2">

@@ -30,6 +30,8 @@ public:
 	void GetFolderVSTList();
 	void GetGeneralSetting();
 	void GetAudioSetting();
+	void RestartSelectedAudio();
+	void RefreshAudioStatus();
 	void GetMidiInDevice();
 	void GetMidiOutDevice();
 	void GetMidiSetting();
@@ -50,4 +52,9 @@ public:
 	map<string, int> deviceList;
 	shared_ptr<AudioGeneral> audioGeneral;
 	QStringListModel* vstPathModel;
+	QStringListModel* samplePathModel;
+
+signals:
+	void audioConfigurationChangeStarted();
+	void audioConfigurationChangeFinished(bool streamActive);
 };

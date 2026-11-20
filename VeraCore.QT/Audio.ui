@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>648</width>
-    <height>428</height>
+    <height>488</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -44,7 +44,7 @@
     </item>
     <item>
      <property name="text">
-      <string>MME</string>
+      <string>WASAPI</string>
      </property>
     </item>
    </widget>
@@ -78,7 +78,7 @@
      <x>9</x>
      <y>140</y>
      <width>621</width>
-     <height>81</height>
+     <height>171</height>
     </rect>
    </property>
    <property name="title">
@@ -89,7 +89,7 @@
      <rect>
       <x>10</x>
       <y>40</y>
-      <width>601</width>
+      <width>291</width>
       <height>22</height>
      </rect>
     </property>
@@ -131,6 +131,119 @@
     <property name="text">
      <string>Sample Rate (Hz):</string>
     </property>
+   </widget>
+   <widget class="QComboBox" name="bufferSize">
+    <property name="geometry">
+     <rect><x>320</x><y>40</y><width>291</width><height>22</height></rect>
+    </property>
+    <item><property name="text"><string>32</string></property></item>
+    <item><property name="text"><string>64</string></property></item>
+    <item><property name="text"><string>128</string></property></item>
+    <item><property name="text"><string>256</string></property></item>
+    <item><property name="text"><string>512</string></property></item>
+    <item><property name="text"><string>1024</string></property></item>
+    <item><property name="text"><string>2048</string></property></item>
+    <item><property name="text"><string>4096</string></property></item>
+   </widget>
+   <widget class="QLabel" name="bufferSizeLabel">
+    <property name="geometry">
+     <rect><x>320</x><y>20</y><width>151</width><height>16</height></rect>
+    </property>
+    <property name="text"><string>Buffer Size (samples):</string></property>
+   </widget>
+   <widget class="QLabel" name="latencyStatus">
+    <property name="geometry">
+     <rect><x>10</x><y>82</y><width>601</width><height>61</height></rect>
+    </property>
+    <property name="wordWrap"><bool>true</bool></property>
+    <property name="text"><string>Audio latency unavailable</string></property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="stemSeparationGroup">
+   <property name="geometry">
+     <rect><x>9</x><y>318</y><width>621</width><height>160</height></rect>
+   </property>
+    <property name="title"><string>Stem Separation</string></property>
+   <widget class="QLabel" name="stemExecutableLabel">
+    <property name="geometry"><rect><x>10</x><y>22</y><width>82</width><height>20</height></rect></property>
+    <property name="text"><string>Runtime:</string></property>
+   </widget>
+   <widget class="QLineEdit" name="stemExecutable">
+    <property name="geometry"><rect><x>92</x><y>21</y><width>405</width><height>22</height></rect></property>
+     <property name="placeholderText"><string>Auto-detect selected backend, or choose its executable</string></property>
+   </widget>
+   <widget class="QPushButton" name="browseStemExecutable">
+    <property name="geometry"><rect><x>505</x><y>20</y><width>106</width><height>24</height></rect></property>
+    <property name="text"><string>Browse...</string></property>
+   </widget>
+   <widget class="QLabel" name="stemModelDirectoryLabel">
+    <property name="geometry"><rect><x>10</x><y>49</y><width>82</width><height>20</height></rect></property>
+    <property name="text"><string>Model cache:</string></property>
+   </widget>
+   <widget class="QLineEdit" name="stemModelDirectory">
+    <property name="geometry"><rect><x>92</x><y>48</y><width>405</width><height>22</height></rect></property>
+   </widget>
+   <widget class="QPushButton" name="browseStemModelDirectory">
+    <property name="geometry"><rect><x>505</x><y>47</y><width>106</width><height>24</height></rect></property>
+    <property name="text"><string>Browse...</string></property>
+   </widget>
+   <widget class="QLabel" name="stemComputeLabel">
+    <property name="geometry"><rect><x>10</x><y>76</y><width>82</width><height>20</height></rect></property>
+    <property name="text"><string>Compute:</string></property>
+   </widget>
+   <widget class="QComboBox" name="stemCompute">
+    <property name="geometry"><rect><x>92</x><y>75</y><width>126</width><height>22</height></rect></property>
+    <item><property name="text"><string>Auto</string></property></item>
+    <item><property name="text"><string>CPU</string></property></item>
+    <item><property name="text"><string>GPU 0</string></property></item>
+    <item><property name="text"><string>GPU 1</string></property></item>
+   </widget>
+   <widget class="QLabel" name="stemRuntimeStatus">
+    <property name="geometry"><rect><x>334</x><y>75</y><width>277</width><height>22</height></rect></property>
+    <property name="text"><string>Runtime not configured</string></property>
+    <property name="alignment"><set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter</set></property>
+   </widget>
+   <widget class="QPushButton" name="verifyStemRuntime">
+    <property name="geometry"><rect><x>228</x><y>74</y><width>96</width><height>24</height></rect></property>
+    <property name="text"><string>Verify</string></property>
+   </widget>
+   <widget class="QLabel" name="stemModelStatusLabel">
+    <property name="geometry"><rect><x>10</x><y>103</y><width>82</width><height>20</height></rect></property>
+    <property name="text"><string>Models:</string></property>
+   </widget>
+   <widget class="QLabel" name="stemModelStatus">
+    <property name="geometry"><rect><x>92</x><y>103</y><width>405</width><height>20</height></rect></property>
+    <property name="text"><string>Model cache not inspected</string></property>
+   </widget>
+   <widget class="QPushButton" name="verifyStemModels">
+    <property name="geometry"><rect><x>505</x><y>101</y><width>106</width><height>24</height></rect></property>
+    <property name="text"><string>Verify Models</string></property>
+   </widget>
+   <widget class="QLabel" name="stemBackendLabel">
+    <property name="geometry"><rect><x>10</x><y>132</y><width>82</width><height>20</height></rect></property>
+    <property name="text"><string>Backend:</string></property>
+   </widget>
+    <widget class="QComboBox" name="stemBackend">
+     <property name="geometry"><rect><x>92</x><y>130</y><width>126</width><height>22</height></rect></property>
+    <item><property name="text"><string>Auto</string></property></item>
+    <item><property name="text"><string>Spleeter</string></property></item>
+     <item><property name="text"><string>Demucs</string></property></item>
+    </widget>
+    <widget class="QLabel" name="stemCpuThreadsLabel">
+     <property name="geometry"><rect><x>228</x><y>132</y><width>78</width><height>20</height></rect></property>
+     <property name="text"><string>CPU threads:</string></property>
+    </widget>
+    <widget class="QSpinBox" name="stemCpuThreads">
+     <property name="geometry"><rect><x>306</x><y>130</y><width>58</width><height>22</height></rect></property>
+     <property name="specialValueText"><string>Auto</string></property>
+     <property name="minimum"><number>0</number></property>
+     <property name="maximum"><number>256</number></property>
+     <property name="toolTip"><string>0 leaves two logical cores available for the DAW UI/audio engine.</string></property>
+    </widget>
+    <widget class="QLabel" name="stemBackendStatus">
+     <property name="geometry"><rect><x>374</x><y>132</y><width>237</width><height>20</height></rect></property>
+    <property name="text"><string>Spleeter/Demucs runtime status</string></property>
+    <property name="alignment"><set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter</set></property>
    </widget>
   </widget>
  </widget>

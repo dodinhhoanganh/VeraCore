@@ -1,0 +1,18 @@
+{
+  "name": "veracore",
+  "version-string": "0.1.0",
+  "builtin-baseline": "185a7aa23ac037d711a2a87d5e8d99e7131dbcd8",
+  "dependencies": [
+    {
+      "name": "ffmpeg",
+      "default-features": false,
+      "features": [
+        "avcodec",
+        "avformat",
+        "swresample",
+        "mp3lame",
+        "vorbis"
+      ]
+    }
+  ]
+}

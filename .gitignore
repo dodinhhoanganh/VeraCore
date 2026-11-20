@@ -27,9 +27,10 @@ qrc_*.cpp
 ui_*.h
 *.qmlc
 *.jsc
-Makefile*
-*build-*
-build/
+Makefile
+/build-*/
+/build/
+/vcpkg_installed/
 *.qm
 *.prl
 *.qmlls.ini
@@ -54,3 +55,54 @@ compile_commands.json
 *creator.user*
 
 *_qmlcache.qrc
+
+# Visual Studio workspace state
+.vs/
+*.suo
+*.VC.db
+*.VC.db-*
+*.vsidx
+*.ipch
+*.vcxproj.user
+
+# MSBuild / Qt generated output
+/x64/
+/Win32/
+VeraCore.Audio/x64/
+VeraCore.Audio/VeraCore.Audio/
+VeraCore.QT/x64/
+VeraCore.QT/VeraCore.QT/
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.tlog
+*.lastbuildstate
+*.recipe
+*.FileListAbsolute.txt
+msbuild-*.log
+
+# MemPalace per-project files (issue #185)
+mempalace.yaml
+entities.json
+
+# Local build diagnostics and developer scratch files
+/*.log
+*.bak
+*.bak.*
+/tmp/
+graphify-out/
+/temp_input.wav
+/temp_output.*
+/veracore-*-smoke.png
+/veracore-main-fresh.png
+/phase*-original-hashes.txt
+/3rdparty/portaudio/build/msvc/x64/
+*.local.props
+
+# Machine-specific credentials and tool state
+.env
+.env.*
+!.env.example
+/.agents/
+/.claude/

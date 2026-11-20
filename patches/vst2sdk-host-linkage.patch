@@ -1,0 +1,22 @@
+diff --git a/include/vst.h b/include/vst.h
+index 8350525..177d773 100644
+--- a/include/vst.h
++++ b/include/vst.h
+@@ -1462,7 +1462,7 @@ enum VST_HOST_OPCODE {
+  *
+  * Harvested via strings command and just checking what hosts actually responded to.
+  */
+-struct vst_host_supports_t {
++static struct vst_host_supports_t {
+ 	/** Does the host support modifying input/output/params/delay when programs, banks or parameters are changed?
+ 	 * This only means that the host supports this inside of @ref VST_EFFECT_OPCODE_IDLE (VST 2.3 or earlier) or outside
+ 	 * of a @ref VST_EFFECT_OPCODE_PROCESS_BEGIN and @ref VST_EFFECT_OPCODE_PROCESS_END group.
+@@ -2779,7 +2779,7 @@ enum VST_EFFECT_OPCODE {
+  *
+  * @important These are only available with a C99 or a C++20 or newer compiler.
+  */
+-struct vst_effect_supports_t {
++static struct vst_effect_supports_t {
+ 	/** Effect supports alternative bypass.
+ 	 * The alternative bypass still has the host call process/process_float/process_double and expects us to compensate
+ 	 * for our delay/latency, copy inputs to outputs, and do minimal work. If we don't support it the host will not call

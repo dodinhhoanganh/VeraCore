@@ -15,11 +15,20 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AudioChannelLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="VeraCoreAudio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpatialAudioTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="SpatialAudioTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="VeraCoreAudio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

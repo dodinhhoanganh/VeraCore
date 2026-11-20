@@ -12,10 +12,18 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{16D206F3-67DB-4042-8C6F-799334CA3F44}</ProjectGuid>
-    <Keyword>QtVS_v304</Keyword>
+    <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+    <QtRoot Condition="'$(QtRoot)'=='' AND Exists('C:\Qt\6.3.1\msvc2019_64\bin\uic.exe')">C:\Qt\6.3.1\msvc2019_64</QtRoot>
+    <QtInstallDir Condition="'$(QtInstallDir)'==''">$(QtRoot)</QtInstallDir>
+    <VcpkgRoot Condition="'$(VcpkgRoot)'==''">$(VCPKG_ROOT)</VcpkgRoot>
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+    <VcpkgManifestRoot>$(SolutionDir)</VcpkgManifestRoot>
+    <VcpkgInstalledDir>$(LOCALAPPDATA)\VeraCore\vcpkg_installed</VcpkgInstalledDir>
+    <VcpkgAdditionalInstallOptions>--binarysource=clear</VcpkgAdditionalInstallOptions>
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -31,12 +39,13 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>cai nit</QtInstall>
+    <QtInstall>$(QtRoot)</QtInstall>
     <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
+    <QtLinkNatvisFile>false</QtLinkNatvisFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>cai nit</QtInstall>
+    <QtInstall>$(QtRoot)</QtInstall>
     <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
@@ -47,42 +56,56 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(QtMsBuild)\Qt.props" />
+    <Import Project="$(MSBuildProjectDirectory)\NativeAudioBackends.local.props" Condition="exists('$(MSBuildProjectDirectory)\NativeAudioBackends.local.props')" />
+    <Import Project="$(QtMsBuild)\Qt.props" Condition="Exists('$(QtMsBuild)\Qt.props')" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(QtMsBuild)\Qt.props" />
+    <Import Project="$(MSBuildProjectDirectory)\NativeAudioBackends.local.props" Condition="exists('$(MSBuildProjectDirectory)\NativeAudioBackends.local.props')" />
+    <Import Project="$(QtMsBuild)\Qt.props" Condition="Exists('$(QtMsBuild)\Qt.props')" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="UserMacros">
+    <NativeAudioBackendIncludeDirs Condition="'$(NativeAudioBackendIncludeDirs)' == ''"></NativeAudioBackendIncludeDirs>
+    <NativeAudioBackendLibDirs Condition="'$(NativeAudioBackendLibDirs)' == ''"></NativeAudioBackendLibDirs>
+    <NativeAudioBackendLibraries Condition="'$(NativeAudioBackendLibraries)' == ''"></NativeAudioBackendLibraries>
+    <NativeAudioBackendDefinitions Condition="'$(NativeAudioBackendDefinitions)' == ''"></NativeAudioBackendDefinitions>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>$(MSBuildProjectDirectory)\..\3rdparty\vst3sdk;$(MSBuildProjectDirectory)\..\3rdparty\vst2sdk\include;$(MSBuildProjectDirectory)\..\3rdparty\clap\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(QtRoot)\include;$(QtRoot)\include\QtCore;$(QtRoot)\include\QtGui;$(QtRoot)\include\QtWidgets;$(QtRoot)\mkspecs\win32-msvc;$(MSBuildProjectDirectory)\..\3rdparty\vst3sdk;$(MSBuildProjectDirectory)\..\3rdparty\vst2sdk\include;$(MSBuildProjectDirectory)\..\3rdparty\clap\include;$(MSBuildProjectDirectory)\..\3rdparty\ARA_API;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <IncludePath>$(QtRoot)\include;$(QtRoot)\include\QtCore;$(QtRoot)\include\QtGui;$(QtRoot)\include\QtWidgets;$(QtRoot)\mkspecs\win32-msvc;$(MSBuildProjectDirectory)\..\3rdparty\vst3sdk;$(MSBuildProjectDirectory)\..\3rdparty\vst2sdk\include;$(MSBuildProjectDirectory)\..\3rdparty\clap\include;$(MSBuildProjectDirectory)\..\3rdparty\ARA_API;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PostBuildEvent>
-      <Command>copy /Y "C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.dll" "$(OutDir)"</Command>
+      <Command>copy /Y "$(SolutionDir)3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.dll" "$(OutDir)"
+"$(QtRoot)\bin\windeployqt.exe" --debug --compiler-runtime "$(TargetPath)"</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>"C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.lib";"C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\x64\Debug\VeraCore.Audio.lib";%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VcpkgInstalledDir)\$(VcpkgTriplet)\debug\lib;$(VcpkgInstalledDir)\$(VcpkgTriplet)\lib;$(QtRoot)\lib;$(SolutionDir)x64\Debug;$(NativeAudioBackendLibDirs);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Qt6Widgetsd.lib;Qt6Guid.lib;Qt6Cored.lib;Qt6EntryPointd.lib;"$(SolutionDir)3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.lib";"$(SolutionDir)x64\Debug\VeraCore.Audio.lib";avformat.lib;avcodec.lib;avutil.lib;swresample.lib;winmm.lib;$(NativeAudioBackendLibraries);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio;C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\VeraCore\3rdparty\portaudio\include;$(MSBuildProjectDirectory)\..\3rdparty\vst3sdk;$(MSBuildProjectDirectory)\..\3rdparty\vst2sdk\include;$(MSBuildProjectDirectory)\..\3rdparty\clap\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(VcpkgInstalledDir)\$(VcpkgTriplet)\include;$(QtRoot)\include;$(QtRoot)\include\QtCore;$(QtRoot)\include\QtGui;$(QtRoot)\include\QtWidgets;$(QtRoot)\mkspecs\win32-msvc;$(SolutionDir)3rdparty\portaudio;$(SolutionDir)3rdparty\portaudio\include;$(MSBuildProjectDirectory)\..\3rdparty\vst3sdk;$(MSBuildProjectDirectory)\..\3rdparty\vst2sdk\include;$(MSBuildProjectDirectory)\..\3rdparty\clap\include;$(MSBuildProjectDirectory)\..\3rdparty\ARA_API;$(NativeAudioBackendIncludeDirs);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;NOMINMAX;WIN32_LEAN_AND_MEAN;VC_AUDIO_WITH_FFMPEG=1;VC_AUDIO_FFMPEG_READY=1;VERACORE_ARA_SDK_AVAILABLE=1;$(NativeAudioBackendDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PostBuildEvent>
-      <Command>copy /Y "C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.dll" "$(OutDir)"</Command>
+      <Command>copy /Y "$(SolutionDir)3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.dll" "$(OutDir)"
+"$(QtRoot)\bin\windeployqt.exe" --release --compiler-runtime "$(TargetPath)"</Command>
     </PostBuildEvent>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>"C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.lib";"C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\x64\Release\VeraCore.Audio.lib";%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VcpkgInstalledDir)\$(VcpkgTriplet)\lib;$(QtRoot)\lib;$(SolutionDir)x64\Release;$(NativeAudioBackendLibDirs);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Qt6Widgets.lib;Qt6Gui.lib;Qt6Core.lib;Qt6EntryPoint.lib;"$(SolutionDir)3rdparty\portaudio\build\msvc\x64\Release\portaudio_x64.lib";"$(SolutionDir)x64\Release\VeraCore.Audio.lib";avformat.lib;avcodec.lib;avutil.lib;swresample.lib;winmm.lib;$(NativeAudioBackendLibraries);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\3rdparty\portaudio;C:\Users\ngoan\Desktop\lap trinh\phan mem\cross-platform\VeraCore\VeraCore\3rdparty\portaudio\include;$(MSBuildProjectDirectory)\..\3rdparty\vst3sdk;$(MSBuildProjectDirectory)\..\3rdparty\vst2sdk\include;$(MSBuildProjectDirectory)\..\3rdparty\clap\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(VcpkgInstalledDir)\$(VcpkgTriplet)\include;$(QtRoot)\include;$(QtRoot)\include\QtCore;$(QtRoot)\include\QtGui;$(QtRoot)\include\QtWidgets;$(QtRoot)\mkspecs\win32-msvc;$(SolutionDir)3rdparty\portaudio;$(SolutionDir)3rdparty\portaudio\include;$(MSBuildProjectDirectory)\..\3rdparty\vst3sdk;$(MSBuildProjectDirectory)\..\3rdparty\vst2sdk\include;$(MSBuildProjectDirectory)\..\3rdparty\clap\include;$(MSBuildProjectDirectory)\..\3rdparty\ARA_API;$(NativeAudioBackendIncludeDirs);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;NOMINMAX;WIN32_LEAN_AND_MEAN;VC_AUDIO_WITH_FFMPEG=1;VC_AUDIO_FFMPEG_READY=1;VERACORE_ARA_SDK_AVAILABLE=1;$(NativeAudioBackendDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -126,10 +149,32 @@
     <ClCompile Include="TrackWidget.cpp" />
     <ClCompile Include="TransportWidget.cpp" />
     <ClCompile Include="InspectorWidget.cpp" />
+    <ClCompile Include="AudioEditorWidget.cpp" />
     <ClCompile Include="PluginManager.cpp" />
     <ClCompile Include="PluginLoader.cpp" />
     <ClCompile Include="PluginScannerWorker.cpp" />
+    <ClCompile Include="AudioFileDecoder.cpp" />
+    <ClCompile Include="AudioCodecBackend.cpp" />
+    <ClCompile Include="NativeAudioCodecBackend.cpp" />
+    <ClCompile Include="FfmpegAudioCodecBackend.cpp" />
+    <ClCompile Include="AraHost.cpp" />
+    <ClCompile Include="ExternalPluginHost.cpp" />
+    <ClCompile Include="..\3rdparty\vst3sdk\pluginterfaces\base\coreiids.cpp" />
+    <ClCompile Include="..\3rdparty\vst3sdk\public.sdk\source\vst\vstinitiids.cpp" />
+    <ClCompile Include="AudioStretchBackend.cpp" />
+    <ClCompile Include="SampleScannerWorker.cpp" />
     <ClCompile Include="PlaylistView.cpp" />
+    <ClCompile Include="MidiEditorWindow.cpp" />
+    <ClCompile Include="SelectionService.cpp" />
+    <ClCompile Include="CommandRegistry.cpp" />
+    <ClCompile Include="MixerParameterService.cpp" />
+    <ClCompile Include="WorkspaceManager.cpp" />
+    <ClCompile Include="KeymapProfileManager.cpp" />
+    <ClCompile Include="DawTheme.cpp" />
+    <ClCompile Include="ProjectJsonMerge.cpp" />
+    <ClCompile Include="AudioMediaResolver.cpp" />
+    <ClCompile Include="AudioTempoAnalysis.cpp" />
+    <ClCompile Include="StemSeparationService.cpp" />
     <QtUic Include="Files.ui" />
     <QtUic Include="General.ui" />
     <QtUic Include="MIDI.ui" />
@@ -140,6 +185,7 @@
     <QtMoc Include="DarkStyle.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="NativeAudioBackends.props.example" />
     <None Include="darkstyle\darkstyle.qss" />
   </ItemGroup>
   <ItemGroup>
@@ -147,14 +193,40 @@
     <QtMoc Include="TrackWidget.h" />
     <QtMoc Include="TransportWidget.h" />
     <QtMoc Include="InspectorWidget.h" />
+    <QtMoc Include="AudioEditorWidget.h" />
     <QtMoc Include="PlaylistView.h" />
     <QtMoc Include="PluginScannerWorker.h" />
+    <QtMoc Include="SampleScannerWorker.h" />
+    <QtMoc Include="SelectionService.h" />
+    <QtMoc Include="CommandRegistry.h" />
+    <QtMoc Include="MixerParameterService.h" />
+    <QtMoc Include="WorkspaceManager.h" />
+    <QtMoc Include="KeymapProfileManager.h" />
+    <QtMoc Include="StemSeparationService.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioGeneral.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="PluginManager.h" />
     <ClInclude Include="PluginLoader.h" />
+    <ClInclude Include="AudioFileDecoder.h" />
+    <ClInclude Include="AudioNativeBackendConfig.h" />
+    <ClInclude Include="AudioCodecBackend.h" />
+    <ClInclude Include="NativeAudioCodecBackend.h" />
+    <ClInclude Include="FfmpegAudioCodecBackend.h" />
+    <ClInclude Include="AraHost.h" />
+    <ClInclude Include="ExternalPluginHost.h" />
+    <ClInclude Include="AudioStretchBackend.h" />
+    <ClInclude Include="MidiClipModel.h" />
+    <ClInclude Include="MidiEditorWindow.h" />
+    <ClInclude Include="DawTheme.h" />
+    <ClInclude Include="ProjectJsonMerge.h" />
+    <ClInclude Include="AudioMediaResolver.h" />
+    <ClInclude Include="AudioTempoAnalysis.h" />
+    <ClInclude Include="..\3rdparty\ARA_API\ARAInterface.h" />
+    <ClInclude Include="..\3rdparty\ARA_API\ARAVST3.h" />
+    <ClInclude Include="..\3rdparty\ARA_API\ARACLAP.h" />
+    <ClInclude Include="..\3rdparty\ARA_API\ARAAudioFileChunks.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

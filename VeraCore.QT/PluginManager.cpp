@@ -36,7 +36,10 @@ void PluginManager::loadDiscoveredPlugins() {
         info.version = settings.value("version").toString();
         info.category = settings.value("category").toString();
         info.uid = settings.value("uid").toString();
-        m_discoveredPlugins.push_back(info);
+        info.scanFingerprint = settings.value("scanFingerprint").toString();
+        if (!info.type.startsWith("Invalid") && PluginLoader::IsX64Candidate(info)) {
+            m_discoveredPlugins.push_back(info);
+        }
     }
     settings.endArray();
 }
@@ -53,6 +56,7 @@ void PluginManager::saveDiscoveredPlugins() {
         settings.setValue("version", m_discoveredPlugins[i].version);
         settings.setValue("category", m_discoveredPlugins[i].category);
         settings.setValue("uid", m_discoveredPlugins[i].uid);
+        settings.setValue("scanFingerprint", m_discoveredPlugins[i].scanFingerprint);
     }
     settings.endArray();
 }
@@ -73,11 +77,9 @@ QStringList PluginManager::GetAutoDiscoveredPaths() const {
 #ifdef Q_OS_WIN
     // 1. VST3 Default Paths
     paths << "C:/Program Files/Common Files/VST3";
-    paths << "C:/Program Files (x86)/Common Files/VST3";
 
     // 2. CLAP Default Paths
     paths << "C:/Program Files/Common Files/CLAP";
-    paths << "C:/Program Files (x86)/Common Files/CLAP";
 
     // 3. VST2 Registry Paths
     QSettings regVST2("HKEY_LOCAL_MACHINE\\SOFTWARE\\VST", QSettings::NativeFormat);
@@ -113,13 +115,17 @@ void PluginManager::ScanPlugins() {
 
     const std::vector<PluginInfo> candidates = PluginLoader::CollectCandidates(GetAllPaths());
     for (const PluginInfo& candidate : candidates) {
-        const std::vector<PluginInfo> found = PluginLoader::ScanBinary(candidate);
-        for (const PluginInfo& info : found) {
+        const QString fingerprint = PluginLoader::CandidateFingerprint(candidate);
+        const std::vector<PluginInfo> found =
+            PluginLoader::ScanBinaryIsolated(candidate, 15000);
+        for (PluginInfo info : found) {
             if (!info.type.startsWith("Invalid")) {
+                info.scanFingerprint = fingerprint;
                 m_discoveredPlugins.push_back(info);
             }
         }
     }
+    saveDiscoveredPlugins();
 }
 
 void PluginManager::SetDiscoveredPlugins(const std::vector<PluginInfo>& plugins) {

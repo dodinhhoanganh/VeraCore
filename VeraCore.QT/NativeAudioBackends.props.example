@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    Copy this file to NativeAudioBackends.local.props and edit the paths/libs.
+    The project imports that local file if it exists. Keep SDK binaries local;
+    Optional direct codec SDKs can supplement embedded FFmpeg. No external transcoder process is launched.
+  -->
+  <PropertyGroup Label="UserMacros">
+    <NativeAudioBackendIncludeDirs>
+      C:\SDKs\lame\include;
+      C:\SDKs\flac\include;
+      C:\SDKs\libogg\include;
+      C:\SDKs\libvorbis\include;
+      C:\SDKs\wavpack\include;
+      C:\SDKs\elastique\include;
+      $(NativeAudioBackendIncludeDirs)
+    </NativeAudioBackendIncludeDirs>
+    <NativeAudioBackendLibDirs>
+      C:\SDKs\lame\lib\x64;
+      C:\SDKs\flac\lib\x64;
+      C:\SDKs\libogg\lib\x64;
+      C:\SDKs\libvorbis\lib\x64;
+      C:\SDKs\wavpack\lib\x64;
+      C:\SDKs\elastique\lib\x64;
+      $(NativeAudioBackendLibDirs)
+    </NativeAudioBackendLibDirs>
+    <NativeAudioBackendLibraries>
+      libmp3lame.lib;
+      FLAC.lib;
+      ogg.lib;
+      vorbis.lib;
+      vorbisenc.lib;
+      vorbisfile.lib;
+      wavpack.lib;
+      elastiquePro.lib;
+      $(NativeAudioBackendLibraries)
+    </NativeAudioBackendLibraries>
+    <NativeAudioBackendDefinitions>
+      VC_AUDIO_WITH_LAME=1;
+      VC_AUDIO_LAME_ENCODER_READY=1;
+      VC_AUDIO_MP3_DECODER_READY=1;
+      VC_AUDIO_WITH_FLAC=1;
+      VC_AUDIO_FLAC_CODEC_READY=1;
+      VC_AUDIO_WITH_VORBIS=1;
+      VC_AUDIO_VORBIS_CODEC_READY=1;
+      VC_AUDIO_WITH_WAVPACK=1;
+      VC_AUDIO_WAVPACK_CODEC_READY=1;
+      VC_AUDIO_WITH_ELASTIQUE=1;
+      VC_AUDIO_ELASTIQUE_PROCESSOR_READY=1;
+      $(NativeAudioBackendDefinitions)
+    </NativeAudioBackendDefinitions>
+  </PropertyGroup>
+</Project>
