@@ -9,7 +9,7 @@ Cài Visual Studio với workload Desktop development with C++, toolset v145, Wi
 Từ Developer PowerShell, lấy đúng nhánh và các SDK đi kèm:
 
 ```powershell
-git clone --branch codex/hybrid-arrangement-ui --recurse-submodules https://github.com/dodinhhoanganh/VeraCore.git
+git clone --branch main --recurse-submodules https://github.com/dodinhhoanganh/VeraCore.git
 cd VeraCore
 git -C 3rdparty/vst2sdk apply ../../patches/vst2sdk-host-linkage.patch
 ```
